@@ -1,0 +1,17 @@
+TenantKit.configure do |config|
+  # The model that represents a tenant.
+  config.tenant_class = "<%= tenant_class_name %>"
+
+  # The foreign-key column on tenant-owned tables.
+  config.tenant_column = "<%= tenant_singular %>_id"
+
+  # Strict mode: raise TenantKit::NoTenantSet when a tenant-scoped query runs
+  # with no current tenant (and not inside TenantKit.without_tenant).
+  config.require_tenant = true
+
+  # Carry the current tenant into ActiveJob background jobs.
+  config.propagate_to_jobs = true
+
+  # Raise if a job is performed with no captured tenant.
+  config.raise_on_missing_job_tenant = false
+end

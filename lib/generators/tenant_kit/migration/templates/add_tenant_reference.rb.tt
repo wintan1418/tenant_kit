@@ -1,0 +1,6 @@
+class Add<%= tenant_reference.camelize %>To<%= table_name.camelize %> < ActiveRecord::Migration[<%= migration_version %>]
+  def change
+    add_reference :<%= table_name %>, :<%= tenant_reference %>,
+      null: false, foreign_key: true, index: true
+  end
+end

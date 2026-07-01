@@ -1,0 +1,14 @@
+class Create<%= tenant_plural.camelize %> < ActiveRecord::Migration[<%= migration_version %>]
+  def change
+    create_table :<%= tenant_plural %> do |t|
+      t.string :name, null: false
+      t.string :subdomain
+      t.string :domain
+
+      t.timestamps
+    end
+
+    add_index :<%= tenant_plural %>, :subdomain, unique: true
+    add_index :<%= tenant_plural %>, :domain, unique: true
+  end
+end

@@ -1,0 +1,3 @@
+class <%= tenant_class_name %> < ApplicationRecord
+  # The tenant model. It does NOT call belongs_to_tenant.
+end
