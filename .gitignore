@@ -14,6 +14,11 @@ spec/dummy/db/*.sqlite3
 spec/dummy/db/*.sqlite3-*
 spec/examples.txt
 
+# Secrets / local env — never commit
+.env
+.env.*
+.gem/credentials
+
 # Editor / OS noise
 .DS_Store
 *.swp
