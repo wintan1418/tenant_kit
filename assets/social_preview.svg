@@ -1,0 +1,62 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TenantKit — Row-level multi-tenancy for Rails, strict by default">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#180d2b"/>
+      <stop offset="0.55" stop-color="#271248"/>
+      <stop offset="1" stop-color="#3a1d5e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff7a59"/>
+      <stop offset="1" stop-color="#e9573f"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- ambient glows -->
+  <circle cx="1120" cy="130" r="220" fill="#e9573f" opacity="0.10"/>
+  <circle cx="180" cy="560" r="200" fill="#38bdf8" opacity="0.08"/>
+
+  <!-- tenant stack glyph -->
+  <g transform="translate(150,210) scale(1.35)" filter="url(#soft)">
+    <rect x="26" y="0"  width="150" height="52" rx="12" fill="#ffffff" opacity="0.16"/>
+    <rect x="13" y="46" width="150" height="52" rx="12" fill="#ffffff" opacity="0.28"/>
+    <rect x="0"  y="92" width="150" height="52" rx="12" fill="#20143a" stroke="url(#teal)" stroke-width="2.5"/>
+    <rect x="14" y="108" width="92" height="8" rx="4" fill="url(#accent)"/>
+    <rect x="14" y="124" width="60" height="6" rx="3" fill="#8b7bb3"/>
+    <circle cx="128" cy="118" r="9" fill="url(#teal)"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="470" y="290" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="110" font-weight="700" fill="#ffffff" letter-spacing="-2">Tenant<tspan fill="url(#accent)">Kit</tspan></text>
+
+  <!-- tagline lines -->
+  <text x="474" y="352" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="34" font-weight="400" fill="#cabce8">Row-level multi-tenancy for Rails</text>
+  <text x="474" y="400" xml:space="preserve" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="34" font-weight="700" fill="#ffffff">strict by default<tspan font-weight="400" fill="#cabce8">   ·   background-job safe</tspan></text>
+
+  <!-- bottom chips (SVG-drawn dot bullets; no emoji fonts required) -->
+  <g font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700">
+    <rect x="150" y="470" width="228" height="52" rx="26" fill="#ffffff" opacity="0.09"/>
+    <circle cx="184" cy="496" r="8" fill="url(#accent)"/>
+    <text x="204" y="505" fill="#efe7fb">No leaks</text>
+
+    <rect x="398" y="470" width="300" height="52" rx="26" fill="#ffffff" opacity="0.09"/>
+    <circle cx="432" cy="496" r="8" fill="url(#teal)"/>
+    <text x="452" y="505" fill="#efe7fb">Job propagation</text>
+
+    <rect x="718" y="470" width="340" height="52" rx="26" fill="#ffffff" opacity="0.09"/>
+    <circle cx="752" cy="496" r="8" fill="url(#accent)"/>
+    <text x="772" y="505" fill="#efe7fb">belongs_to_tenant</text>
+  </g>
+
+  <!-- gem footer -->
+  <text x="150" y="588" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="700" fill="#8f7fb8">gem install tenant_kit</text>
+  <text x="1130" y="588" font-family="'DejaVu Sans','Segoe UI',Arial,sans-serif" font-size="24" font-weight="400" fill="#8f7fb8" text-anchor="end">MIT · Rails 8</text>
+</svg>

@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🏢 TenantKit
+<img src="assets/banner.svg" alt="TenantKit — row-level multi-tenancy for Rails, strict by default" width="100%">
 
-### Row-level multi-tenancy for Rails — **strict by default**, with background-job tenant propagation.
+<br>
 
 *One database. A tenant foreign key on every owned table. Automatic query scoping. No cross-tenant leaks — not even in your jobs.*
 
@@ -238,7 +238,7 @@ Released under the [MIT License](MIT-LICENSE).
 
 ---
 
-**[⬆ back to top](#-tenantkit)**
+**[⬆ back to top](#-why-tenantkit)**
 
 Built with ❤️ for Rails SaaS teams.
 
