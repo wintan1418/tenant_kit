@@ -17,5 +17,7 @@ spec/examples.txt
 .DS_Store
 *.swp
 
-# Build handoff spec (kept locally, not shipped)
-original_gem.zip
+# Internal build/handoff docs — kept locally, never published (open-source repo)
+CLAUDE.md
+MASTER_BUILD.md
+*.zip
