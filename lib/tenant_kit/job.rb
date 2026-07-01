@@ -1,3 +1,5 @@
+require "global_id"
+
 module TenantKit
   # Mixed into +ActiveJob::Base+ (via the railtie, when
   # +config.propagate_to_jobs+ is true) so a job runs under the same tenant it

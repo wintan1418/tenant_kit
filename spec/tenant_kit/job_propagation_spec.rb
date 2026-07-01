@@ -16,6 +16,12 @@ RSpec.describe "Job tenant propagation", type: :job do
     ActiveJob::Base.queue_adapter = original
   end
 
+  it "ensures GlobalID is wired for the tenant model" do
+    expect(GlobalID.app).to be_present
+    expect(ActiveRecord::Base.include?(GlobalID::Identification)).to be(true)
+    expect(acme).to respond_to(:to_global_id)
+  end
+
   it "captures the tenant GlobalID into the serialized payload" do
     job = TenantKit.with_tenant(acme) do
       TenantProbeJob.new.tap { |j| j.run_callbacks(:enqueue) { } }

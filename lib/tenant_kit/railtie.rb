@@ -1,3 +1,10 @@
+# Ensure GlobalID is fully wired (GlobalID.app set, GlobalID::Identification
+# included into ActiveRecord::Base) — job propagation depends on it, and a host
+# app that doesn't otherwise use GlobalID (e.g. a --minimal app) won't have its
+# railtie loaded. Registering it here, at gem-load time, lets Rails run its
+# initializers during boot exactly as a full app would.
+require "global_id/railtie"
+
 module TenantKit
   # Wires TenantKit into a Rails application on boot. Each concern is included
   # only if it has been required, so the gem boots correctly at every build
