@@ -5,6 +5,7 @@ require "tenant_kit/errors"
 require "tenant_kit/configuration"
 require "tenant_kit/current"
 require "tenant_kit/model"
+require "tenant_kit/controller_concern"
 require "tenant_kit/railtie" if defined?(Rails::Railtie)
 
 # TenantKit — row-level (shared-schema) multi-tenancy for Rails.
