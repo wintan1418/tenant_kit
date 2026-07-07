@@ -52,6 +52,7 @@ Most Rails SaaS apps are multi-tenant. The **row-level** approach — a shared s
 - [Configuration](#-configuration)
 - [Testing](#-testing)
 - [Gotchas](#-gotchas-read-this)
+- [Why `default_scope`?](#-why-default_scope)
 - [Why row-level?](#-why-row-level-and-not-the-others)
 - [Roadmap](#-roadmap)
 - [Development & contributing](#-development)
@@ -200,6 +201,24 @@ end
 - **Unique constraints must include the tenant column** at the DB level: `add_index :projects, [:account_id, :slug], unique: true`. Pair it with `validates_uniqueness_to_tenant :slug`.
 - **Lead composite indexes with the tenant column:** `add_index :projects, [:account_id, :status]`.
 
+## 🧷 Why `default_scope`?
+
+`default_scope` is rightly treated as an anti-pattern in ordinary application code: it applies to every query, leaks into associations and joins, and can seed attribute defaults on `.new`. So why does TenantKit use it?
+
+Because tenancy is a **security boundary, not a convenience filter**, and the two options fail in opposite directions:
+
+- **Explicit scoping fails *open*.** If a developer forgets to call the scope, the query silently returns *every* tenant's rows. The cost of a mistake is a cross-tenant data leak.
+- **`default_scope` fails *closed*.** If a developer forgets, the query **raises `NoTenantSet`** instead of leaking. The cost of a mistake is a loud error in development, not a quiet breach in production.
+
+For the thing being protected — one tenant seeing another's data — failing closed is the safer default. It's the same call [`acts_as_tenant`](https://github.com/ErwinM/acts_as_tenant) makes, for the same reason.
+
+TenantKit also defuses the two edges that make `default_scope` painful:
+
+- **No surprising `.new` defaults.** The tenant is assigned in a `before_validation`, *not* by the scope, and `.new` is wrapped so a built record never inherits scope values. `Project.new` behaves exactly as you'd expect.
+- **No `unscoped` sledgehammer.** Instead of `unscoped` (which drops *every* condition on the model), you reach for `without_tenant { }`, which lifts only the tenant condition — explicit and greppable.
+
+If you prefer opt-in scoping at the call site, an explicit mode is on the [roadmap](#-roadmap). Open an issue if you want it.
+
 ## 🤔 Why row-level (and not the others)?
 
 | Strategy | Isolation | Ops cost | Verdict |
@@ -214,6 +233,7 @@ Row-level works cleanly with every Rails default and has exactly **one** migrati
 
 Not in v1 — tracked for future releases:
 
+- [ ] Optional explicit scoping mode (opt in at the call site, no `default_scope`)
 - [ ] Automatic Action Cable stream scoping
 - [ ] Solid Cache tenant-aware caching helpers
 - [ ] Schema-per-tenant / database-per-tenant modes
