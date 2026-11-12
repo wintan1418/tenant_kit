@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (cross-tenant leak)
+    url: https://github.com/wintan1418/tenant_kit/security/advisories/new
+    about: Please report isolation bugs privately, not as a public issue.
