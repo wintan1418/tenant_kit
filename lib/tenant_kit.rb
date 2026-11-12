@@ -1,12 +1,18 @@
 require "active_support"
+require "active_record"
 
 require "tenant_kit/version"
 require "tenant_kit/errors"
 require "tenant_kit/configuration"
 require "tenant_kit/current"
 require "tenant_kit/model"
+require "tenant_kit/explicit_scoping"
 require "tenant_kit/controller_concern"
 require "tenant_kit/job"
+require "tenant_kit/streams"
+require "tenant_kit/cable"
+require "tenant_kit/turbo"
+require "tenant_kit/postgres_rls"
 require "tenant_kit/railtie" if defined?(Rails::Railtie)
 
 # TenantKit — row-level (shared-schema) multi-tenancy for Rails.
@@ -34,15 +40,22 @@ module TenantKit
     # Runs the block with +tenant+ as the current tenant, restoring the previous
     # tenant afterwards (even on error). The sanctioned way to switch tenants.
     #
+    # The block is always *scoped*, even when called inside {without_tenant}:
+    # asking for a tenant means queries are filtered to that tenant. (In 0.1 a
+    # +with_tenant+ nested in +without_tenant+ stayed unscoped.)
+    #
     # @param tenant [Object] the tenant record to scope to.
     # @yield the block to run under +tenant+.
     # @return [Object] the block's return value.
     def with_tenant(tenant)
       previous = Current.tenant
+      was_disabled = Current.scoping_disabled
       Current.tenant = tenant
+      Current.scoping_disabled = false
       yield
     ensure
       Current.tenant = previous
+      Current.scoping_disabled = was_disabled
     end
 
     # Runs the block with tenant scoping disabled — the single, greppable escape
@@ -68,6 +81,17 @@ module TenantKit
     # @return [Boolean] true when inside a {without_tenant} block.
     def scoping_disabled?
       !!Current.scoping_disabled
+    end
+
+    # @return [Object, nil] the primary key of the current tenant.
+    def current_tenant_id
+      Current.tenant&.id
+    end
+
+    # @return [Object] the current tenant.
+    # @raise [NoTenantSet] when no tenant is set.
+    def current_tenant!
+      Current.tenant || raise(NoTenantSet, "No current tenant set")
     end
   end
 end

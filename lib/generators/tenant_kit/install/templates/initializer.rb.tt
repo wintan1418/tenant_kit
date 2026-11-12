@@ -9,9 +9,30 @@ TenantKit.configure do |config|
   # with no current tenant (and not inside TenantKit.without_tenant).
   config.require_tenant = true
 
-  # Carry the current tenant into ActiveJob background jobs.
+  # Refuse writes that cross a tenant boundary: changing a record's tenant,
+  # saving a record under another tenant, insert_all/upsert_all rows naming
+  # another tenant. Allowed inside TenantKit.without_tenant.
+  config.prevent_cross_tenant_writes = true
+
+  # Also add the tenant condition to the UPDATE/DELETE that record-level
+  # writes run (save, update_columns, destroy). Read when models load.
+  # config.scope_record_writes = true
+
+  # Carry the current tenant into ActiveJob background jobs, and refuse job
+  # arguments that are tenant-owned records of another tenant.
   config.propagate_to_jobs = true
+  config.verify_job_arguments = true
 
   # Raise if a job is performed with no captured tenant.
   config.raise_on_missing_job_tenant = false
+
+  # Models declared with `belongs_to_tenant scoping: :explicit`: what to do
+  # when one is queried without .for_current_tenant. nil = :raise in
+  # development/test, :log elsewhere.
+  # config.explicit_scoping_guard = nil
+
+  # PostgreSQL Row-Level Security as a second line of defence. Run
+  # `rails g tenant_kit:rls` first and read docs/POSTGRES_RLS.md.
+  # config.postgres_rls = true
+  # config.postgres_rls_strategy = :session # :transaction behind PgBouncer transaction pooling
 end

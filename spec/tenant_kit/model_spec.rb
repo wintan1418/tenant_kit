@@ -21,12 +21,25 @@ RSpec.describe "belongs_to_tenant" do
     end
   end
 
-  it "does not overwrite an explicitly set tenant" do
+  it "does not overwrite an explicitly set tenant, and refuses to save it under another tenant" do
     other = Account.create!(name: "Other")
+    TenantKit.with_tenant(acme) do
+      project = Project.new(name: "Explicit", account: other)
+      expect(project).not_to be_valid
+      expect(project.account).to eq(other)
+      expect(project.errors[:account]).to include("must be the current tenant")
+    end
+  end
+
+  it "keeps the 0.1 behaviour when prevent_cross_tenant_writes is false" do
+    other = Account.create!(name: "Other")
+    TenantKit.config.prevent_cross_tenant_writes = false
     TenantKit.with_tenant(acme) do
       project = Project.create!(name: "Explicit", account: other)
       expect(project.account).to eq(other)
     end
+  ensure
+    TenantKit.config.prevent_cross_tenant_writes = true
   end
 
   it "validates presence of the tenant when none is set" do
