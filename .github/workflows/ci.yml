@@ -57,11 +57,13 @@ jobs:
         run: |
           docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root \
             mysql:8.4 --mysql-native-password=ON
-          for i in $(seq 1 60); do
-            docker exec mysql mysqladmin ping -uroot -proot --silent && break
+          # The image first runs a temporary init server (networking off) that
+          # already answers pings, so wait for a real query over TCP.
+          for i in $(seq 1 90); do
+            docker exec mysql mysql --protocol=TCP -h127.0.0.1 -uroot -proot -e "SELECT 1" >/dev/null 2>&1 && break
             sleep 2
           done
-          docker exec mysql mysql -uroot -proot -e \
+          docker exec mysql mysql --protocol=TCP -h127.0.0.1 -uroot -proot -e \
             "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;"
 
       - name: Set up Ruby
