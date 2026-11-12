@@ -27,3 +27,5 @@ spec/examples.txt
 CLAUDE.md
 MASTER_BUILD.md
 *.zip
+gemfiles/*.gemfile.lock
+/coverage/

@@ -1,0 +1,12 @@
+# CI matrix entry: Rails 7.2.x
+source "https://rubygems.org"
+
+gemspec path: ".."
+
+gem "rails", "~> 7.2.0"
+
+# json 3 removed the `quirks_mode` option this Rails series still passes when
+# encoding (Active Storage metadata, Action Cable broadcasts).
+gem "json", "< 3"
+
+eval_gemfile "common.gemfile"

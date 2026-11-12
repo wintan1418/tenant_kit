@@ -1,0 +1,19 @@
+# Shared development/test dependencies for every Gemfile in the CI matrix.
+# Pick the database with DB=sqlite (default) | postgresql | mysql.
+
+gem "puma"
+
+# Database adapters. trilogy is the MySQL adapter because it needs no
+# libmysqlclient to build.
+gem "sqlite3", ">= 2.1"
+gem "pg", "~> 1.5"
+gem "trilogy", "~> 2.9"
+
+group :development, :test do
+  gem "rspec-rails"
+  gem "simplecov", require: false
+  gem "turbo-rails", require: false
+end
+
+# Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
+gem "rubocop-rails-omakase", require: false

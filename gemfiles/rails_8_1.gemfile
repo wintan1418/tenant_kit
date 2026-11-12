@@ -1,0 +1,8 @@
+# CI matrix entry: Rails 8.1.x
+source "https://rubygems.org"
+
+gemspec path: ".."
+
+gem "rails", "~> 8.1.0"
+
+eval_gemfile "common.gemfile"
