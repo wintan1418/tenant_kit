@@ -12,7 +12,8 @@ Gem::Specification.new do |spec|
                      "query scoping via ActiveSupport::CurrentAttributes, auto-assignment of the " \
                      "current tenant, and first-class tenant propagation into ActiveJob background " \
                      "jobs. It is strict by default: querying a tenant-scoped model with no tenant " \
-                     "set raises rather than leaking another tenant's data."
+                     "set raises rather than leaking another tenant's data. Optional PostgreSQL " \
+                     "Row-Level Security adds database-enforced isolation underneath."
   spec.license     = "MIT"
 
   spec.required_ruby_version = ">= 3.3"
@@ -21,10 +22,11 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/wintan1418/tenant_kit/tree/main"
   spec.metadata["changelog_uri"] = "https://github.com/wintan1418/tenant_kit/blob/main/CHANGELOG.md"
   spec.metadata["bug_tracker_uri"] = "https://github.com/wintan1418/tenant_kit/issues"
+  spec.metadata["documentation_uri"] = "https://github.com/wintan1418/tenant_kit/tree/main/docs"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir["{lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
+    Dir["{lib}/**/*", "docs/**/*.md", "MIT-LICENSE", "Rakefile", "README.md", "CHANGELOG.md", "SECURITY.md", "llms.txt"]
   end
 
   # Runtime dependencies: Rails components only. No exotic deps.
