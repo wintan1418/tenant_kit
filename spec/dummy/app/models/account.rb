@@ -4,4 +4,7 @@
 class Account < ApplicationRecord
   has_many :projects
   has_many :invoices
+  has_many :tasks, through: :projects
+  has_many :documents
+  has_many :notes
 end

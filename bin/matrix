@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Runs the suite for every Rails gemfile x database combination you can run
+# locally. Usage:
+#   bin/matrix                       # rails 7.2/8.0/8.1 x sqlite,postgresql
+#   DBS="sqlite postgresql mysql" bin/matrix
+#   RAILS="8_1" DBS=postgresql bin/matrix
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+RAILS=${RAILS:-"7_2 8_0 8_1"}
+DBS=${DBS:-"sqlite postgresql"}
+status=0
+
+for rails in $RAILS; do
+  gemfile="gemfiles/rails_${rails}.gemfile"
+  BUNDLE_GEMFILE="$gemfile" bundle check >/dev/null 2>&1 || BUNDLE_GEMFILE="$gemfile" bundle install --quiet
+  for db in $DBS; do
+    printf "%-28s" "rails ${rails/_/.} / ${db}"
+    if output=$(BUNDLE_GEMFILE="$gemfile" DB="$db" bundle exec rspec --format progress 2>&1); then
+      echo "ok   $(grep -E 'examples,' <<<"$output" | tail -1)"
+    else
+      status=1
+      echo "FAIL $(grep -E 'examples,' <<<"$output" | tail -1)"
+      grep -E '^rspec ' <<<"$output" | head -20
+    fi
+  done
+done
+
+exit $status

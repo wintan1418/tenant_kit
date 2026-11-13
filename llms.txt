@@ -1,0 +1,49 @@
+# TenantKit
+
+> Row-level (shared-schema) multi-tenancy for Ruby on Rails (Ruby >= 3.3, Rails >= 7.2; CI-tested on Rails 7.2, 8.0, 8.1 with SQLite, PostgreSQL and MySQL). One database, a tenant foreign key on owned tables, automatic query scoping via ActiveSupport::CurrentAttributes. Strict by default: querying an owned model with no current tenant raises instead of leaking. Optional PostgreSQL Row-Level Security for database-enforced isolation. Gem: tenant_kit (MIT). Version 0.2.0. First released July 2026, so it is young; isolation claims are listed with spec references in docs/GUARANTEES.md.
+
+## Install
+
+- `gem "tenant_kit"`, then `rails g tenant_kit:install` (initializer + tenant model) and `rails g tenant_kit:migration Project` (adds `account_id`, NOT NULL, FK, index).
+- Configure in config/initializers/tenant_kit.rb: `tenant_class` ("Account"), `tenant_column` ("account_id").
+
+## Core API
+
+- `belongs_to_tenant` in an owned model: belongs_to + strict tenant default_scope + auto-assign on create + presence validation + cross-tenant write validation. Options: association name, `class_name:`, `foreign_key:`, `optional:`, `inverse_of:`, `scoping: :explicit`.
+- `validates_uniqueness_to_tenant :slug` (uniqueness within the tenant).
+- `TenantKit.with_tenant(account) { ... }` — always scoped, restores afterwards. `TenantKit.without_tenant { ... }` — the only sanctioned escape hatch. `TenantKit::Current.tenant`.
+- Controllers: `set_current_tenant_by_subdomain(:account, :subdomain)`, `set_current_tenant_by_domain`, `set_current_tenant_by_header("X-Tenant-Id")`, `set_current_tenant_through_filter` + `self.current_tenant = ...`.
+- Jobs (ActiveJob, incl. mailers' deliver_later): tenant captured at enqueue (GlobalID in payload), set around perform_now; another tenant's record as argument raises `TenantKit::TenantMismatch`.
+- Explicit mode: `belongs_to_tenant scoping: :explicit` → no default_scope; use `Model.for_current_tenant`; unscoped queries raise `TenantKit::ExplicitScopeMissing` in dev/test.
+- Realtime: `broadcasts_to_tenant`, `turbo_stream_from_tenant`, `TenantKit::Turbo::StreamsChannel`, `TenantKit::Cable::Connection`, `TenantKit::Cable::Channel` (`stream_for_tenant`, `broadcast_to_tenant`), `TenantKit::Streams.stream_name`.
+- PostgreSQL RLS: `rails g tenant_kit:rls`, `config.postgres_rls = true`, `config.postgres_rls_strategy = :session | :transaction` (use :transaction behind PgBouncer transaction pooling). App DB role must not be SUPERUSER/BYPASSRLS.
+- Errors: `TenantKit::NoTenantSet`, `CrossTenantWrite`, `TenantMismatch`, `ExplicitScopeMissing`.
+- Tests: `require "tenant_kit/testing"`, `include TenantKit::Testing` (`as_tenant`, `without_tenant`), reset with `TenantKit::Current.reset`.
+
+## Guaranteed (see docs/GUARANTEES.md for spec links)
+
+- Reads, finders, calculations, joins, includes/preload/eager_load, has_many :through, polymorphic, STI are scoped; `other_account.projects`, `rewhere`/`unscope(where:)` on the tenant column cannot reach another tenant.
+- `update_all`/`delete_all`/`destroy_all`, `Model.update/destroy/delete(id)`, `update_counters` are scoped; `insert_all`/`upsert_all` fill the tenant and raise for rows of other tenants; saving or moving a record across tenants fails validation.
+- Tenant resets between requests/jobs (CurrentAttributes + Rails executor); new threads start without a tenant.
+
+## Not guaranteed (your responsibility)
+
+- `Model.unscoped`, `without_tenant`, raw SQL (`find_by_sql`, `connection.execute`), `update_column(s)` (unless `config.scope_record_writes` or RLS), `connection.raw_connection`.
+- Tables of models without `belongs_to_tenant` (incl. Active Storage/Action Text), signed ids/GlobalIDs located outside jobs, caches, plain Sidekiq workers, raw threads.
+- Choosing/authorizing the tenant for a request.
+
+## Gotchas
+
+- Put the tenant column first in composite and unique indexes.
+- `config.require_tenant = false` makes queries with no tenant return all tenants' rows.
+- `config.scope_record_writes` is read when models load; set it in the initializer.
+
+## Docs
+
+- [README](https://github.com/wintan1418/tenant_kit/blob/main/README.md)
+- [Guarantees](https://github.com/wintan1418/tenant_kit/blob/main/docs/GUARANTEES.md)
+- [PostgreSQL RLS](https://github.com/wintan1418/tenant_kit/blob/main/docs/POSTGRES_RLS.md)
+- [Comparison with other gems](https://github.com/wintan1418/tenant_kit/blob/main/docs/COMPARISON.md)
+- [Migrating from acts_as_tenant](https://github.com/wintan1418/tenant_kit/blob/main/docs/MIGRATING_FROM_ACTS_AS_TENANT.md)
+- [Security policy](https://github.com/wintan1418/tenant_kit/blob/main/SECURITY.md)
+- [Changelog](https://github.com/wintan1418/tenant_kit/blob/main/CHANGELOG.md)

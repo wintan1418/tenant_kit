@@ -5,17 +5,71 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: Ruby ${{ matrix.ruby }} / Rails ${{ matrix.rails }} / ${{ matrix.db }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ "3.3", "3.4" ]
+        rails: [ "7.2", "8.0", "8.1" ]
+        db: [ sqlite, postgresql, mysql ]
+
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails == '7.2' && '7_2' || matrix.rails == '8.0' && '8_0' || '8_1' }}.gemfile
+      DB: ${{ matrix.db }}
+      DB_HOST: 127.0.0.1
+      DB_USERNAME: ${{ matrix.db == 'mysql' && 'root' || 'postgres' }}
+      DB_PASSWORD: ${{ matrix.db == 'mysql' && 'root' || 'postgres' }}
+      CI: "true"
+
+    services:
+      postgres:
+        # An empty image skips the service on non-PostgreSQL jobs.
+        image: ${{ matrix.db == 'postgresql' && 'postgres:17' || '' }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # Started by hand (not as a service) so mysql_native_password can be
+      # enabled: trilogy cannot complete caching_sha2_password's full
+      # authentication over a plain TCP connection.
+      - name: Start MySQL
+        if: matrix.db == 'mysql'
+        run: |
+          docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root \
+            mysql:8.4 --mysql-native-password=ON
+          # The image first runs a temporary init server (networking off) that
+          # already answers pings, so wait for a real query over TCP.
+          for i in $(seq 1 90); do
+            docker exec mysql mysql --protocol=TCP -h127.0.0.1 -uroot -proot -e "SELECT 1" >/dev/null 2>&1 && break
+            sleep 2
+          done
+          docker exec mysql mysql --protocol=TCP -h127.0.0.1 -uroot -proot -e \
+            "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       - name: Run test suite
@@ -35,3 +89,18 @@ jobs:
 
       - name: Lint code for consistent style
         run: bundle exec rubocop -f github
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Build the gem
+        run: gem build tenant_kit.gemspec

@@ -15,3 +15,11 @@ RSpec.describe "TenantKit smoke test" do
     expect(account).to be_persisted
   end
 end
+
+RSpec.describe "Loading TenantKit without Rails" do
+  it "requires cleanly in a plain Ruby process" do
+    lib = File.expand_path("../../lib", __dir__)
+    output = IO.popen([ RbConfig.ruby, "-I", lib, "-e", 'require "tenant_kit"; print TenantKit::VERSION' ], err: [ :child, :out ], &:read)
+    expect(output).to eq(TenantKit::VERSION)
+  end
+end

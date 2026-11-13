@@ -1,0 +1,35 @@
+name: Bug report
+description: Something doesn't work as documented (not a security issue)
+labels: [ bug ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **If this lets one tenant read or change another tenant's data, stop and
+        [report it privately](https://github.com/wintan1418/tenant_kit/security/advisories/new) instead.**
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Model declarations and the smallest code (or failing spec) that shows it.
+      render: ruby
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: tenant_kit 0.2.0, Rails 8.1.1, Ruby 3.4.7, PostgreSQL 17
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: TenantKit configuration
+      render: ruby
